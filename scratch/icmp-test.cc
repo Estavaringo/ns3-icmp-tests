@@ -262,7 +262,7 @@ public:
   void DoSendData (Ptr<Socket> socket, Ipv4Address dst);
   void ReceivePkt (Ptr<Socket> socket);
 
-private:
+public:
   virtual void DoRun (void);
   Ptr<Packet> m_receivedPacket;
 
@@ -285,16 +285,27 @@ IcmpTimeExceedTestCase::~IcmpTimeExceedTestCase ()
 void
 IcmpTimeExceedTestCase::DoSendData (Ptr<Socket> socket, Ipv4Address dst)
 {
+	printf("Iniciando IcmpTimeExceedTestCase... \n\n");
+
+  printf("Enviando Echo Request: \n");
   Ptr<Packet> p = Create<Packet> ();
   Icmpv4Echo echo;
   echo.SetSequenceNumber (1);
   echo.SetIdentifier (0);
   p->AddHeader (echo);
 
+  echo.Print(std::cout);
+  printf("\n\n");
+
+  printf("Cabeçalho da mensagem: \n");
+
   Icmpv4Header header;
   header.SetType (Icmpv4Header::ICMPV4_ECHO);
   header.SetCode (0);
   p->AddHeader (header);
+
+  header.Print(std::cout);
+  printf("\n\n");
 
   Address realTo = InetSocketAddress (dst, 1234);
 
@@ -309,6 +320,7 @@ IcmpTimeExceedTestCase::SendData (Ptr<Socket> socket, Ipv4Address dst)
   m_receivedPacket = Create<Packet> ();
   Simulator::ScheduleWithContext (socket->GetNode ()->GetId (), Seconds (0),
                                   &IcmpTimeExceedTestCase::DoSendData, this, socket, dst);
+
   Simulator::Run ();
 }
 
@@ -319,17 +331,23 @@ IcmpTimeExceedTestCase::ReceivePkt (Ptr<Socket> socket)
   Address from;
   Ptr<Packet> p = socket->RecvFrom (0xffffffff, 0, from);
   m_receivedPacket = p->Copy ();
+  printf("\n\nRecebeu o pacote Echo Reply! Abrindo, temos: \n\n");
 
+  printf("Header do ipv4:\n");
   Ipv4Header ipv4;
   p->RemoveHeader (ipv4);
+  ipv4.Print(std::cout);
+
   NS_TEST_EXPECT_MSG_EQ (ipv4.GetProtocol (), 1,"The received packet is not an ICMP packet");
 
   NS_TEST_EXPECT_MSG_EQ (ipv4.GetSource (),Ipv4Address ("10.0.0.2"),
                          "ICMP Time Exceed Response should come from 10.0.0.2");
 
+printf("\n\nHeader do icmp: \n");
   Icmpv4Header icmp;
   p->RemoveHeader (icmp);
-
+  icmp.Print(std::cout);
+  printf("\n\n");
   NS_TEST_EXPECT_MSG_EQ (icmp.GetType (), Icmpv4Header::ICMPV4_TIME_EXCEEDED,
                          "The received packet is not a ICMPV4_TIME_EXCEEDED packet ");
 }
@@ -386,6 +404,7 @@ IcmpTimeExceedTestCase::DoRun ()
 
   NS_TEST_EXPECT_MSG_EQ (m_receivedPacket->GetSize (), 56, " Unexpected ICMP Time Exceed Response packet size");
 
+  printf("Saindo do IcmpTimeExceedTestCase com sucesso!\n");
   Simulator::Destroy ();
   printf("\n\n\n");
 }
@@ -494,7 +513,7 @@ IcmpV6EchoReplyTestCase::ReceivePkt (Ptr <Socket> socket)
       printf("\n\nHeader do ICMPV6: \n");
       Icmpv6Header icmpv6;
       p->RemoveHeader (icmpv6);
-      icmpv6.Print(std::cout);
+      icmpv6.Print(std::cout); //imprime sem ignorar o neighboor discovery
 
       // Ignore the neighbor discovery (ICMPV6_ND) packets
       if (!(((int)icmpv6.GetType () >= 133) && ((int)icmpv6.GetType () <= 137)))
@@ -594,16 +613,25 @@ IcmpV6TimeExceedTestCase::~IcmpV6TimeExceedTestCase ()
 void
 IcmpV6TimeExceedTestCase::DoSendData (Ptr<Socket> socket, Ipv6Address dst)
 {
+
+	printf("Iniciando IcmpV6EchoReplyTestCase: \n\n");
+
+	printf("Enviando Echo request: \n");
   Ptr<Packet> p = Create<Packet> ();
   Icmpv6Echo echo (1);
   echo.SetSeq (1);
   echo.SetId (0XB1ED);
   p->AddHeader (echo);
+  echo.Print(std::cout);
+  printf("\n\n");
 
+  printf("Cabeçalho da mensagem: \n");
   Icmpv6Header header;
   header.SetType (Icmpv6Header::ICMPV6_ECHO_REQUEST);
   header.SetCode (0);
   p->AddHeader (header);
+  header.Print(std::cout);
+  printf("\n\n");
 
   Address realTo = Inet6SocketAddress (dst, 1234);
 
@@ -629,18 +657,27 @@ IcmpV6TimeExceedTestCase::ReceivePkt (Ptr <Socket> socket)
   Ptr<Packet> p = socket->RecvFrom (from);
   m_receivedPacket = p->Copy ();
 
+  printf("\n\nRecebeu um pacote Echo Reply! Abrindo, temos: \n\n");
+
+
   if (Inet6SocketAddress::IsMatchingType (from))
     {
+
+      printf("Header do ipv6: \n");
+
       Ipv6Header ipv6;
       p->RemoveHeader (ipv6);
-
+      ipv6.Print(std::cout);
 
       NS_TEST_EXPECT_MSG_EQ (ipv6.GetNextHeader (),
                              Ipv6Header::IPV6_ICMPV6,
                              "The received Packet is not an ICMPV6 packet");
 
+      printf("\nHeader do ipv6: \n");
+
       Icmpv6Header icmpv6;
       p->RemoveHeader (icmpv6);
+      icmpv6.Print(std::cout); //imprime sem ignorar o neighboor discovery
 
       // Ignore the neighbor discovery (ICMPV6_ND) packets
       if (!(((int)icmpv6.GetType () >= 133) && ((int)icmpv6.GetType () <= 137)))
@@ -740,11 +777,19 @@ static IcmpTestSuite icmpTestSuite; //!< Static variable for test initialization
 
 int main (int argc, char *argv[])
 {
-  IcmpEchoReplyTestCase icmp;
+	
+/*IcmpEchoReplyTestCase icmp;
   icmp.DoRun();
   
   IcmpV6EchoReplyTestCase icmpv6;
-  icmpv6.DoRun();
+  icmpv6.DoRun(); */
+
+	IcmpTimeExceedTestCase timeExceed;
+	timeExceed.DoRun();
+
+	IcmpV6TimeExceedTestCase timeExceedV6;
+	timeExceedV6.DoRun();
+
   printf("\n fim do main ");
   return 0;
 }
