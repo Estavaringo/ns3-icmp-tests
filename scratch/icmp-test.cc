@@ -134,29 +134,30 @@ IcmpEchoReplyTestCase::DoSendData (Ptr<Socket> socket, Ipv4Address dst)
   
   Ptr<Packet> p = Create<Packet> ();
 
-  printf("Enviando...: \n\n");
+  printf("\tREQUEST: \n\n");
 
-  printf("Echo ICMPV4: \n");
   Icmpv4Echo echo;
   echo.SetSequenceNumber (1);
   echo.SetIdentifier (0);
   p->AddHeader (echo);
   echo.Print(std::cout);
-  printf("\n");
+  printf("\n\n");
 
-  printf("Cabeçalho ICMPV4: \n");
 
   Icmpv4Header header;
   header.SetType (Icmpv4Header::ICMPV4_ECHO);
   header.SetCode (0);
   p->AddHeader (header);
-  
-  header.Print(std::cout);
+
 
   Address realTo = InetSocketAddress (dst, 1234);
 
   NS_TEST_EXPECT_MSG_EQ (socket->SendTo (p, 0, realTo),
                          (int) p->GetSize (), " Unable to send ICMP Echo Packet");
+
+  printf("Pacote Enviado: \n");
+  p->Print(std::cout);
+  printf("\n \n");
 
 }
 
@@ -175,30 +176,29 @@ IcmpEchoReplyTestCase::ReceivePkt (Ptr <Socket> socket)
 {
   Address from;
   Ptr<Packet> p = socket->RecvFrom (0xffffffff, 0, from);
-  printf("\n\nRecebeu o pacote Echo Reply! Abrindo, temos: \n\n");
+  printf("\n\n\t RESPONSE: \n\n");
   
   m_receivedPacket = p->Copy ();
 
 
+
   Ipv4Header ipv4;
   p->RemoveHeader (ipv4);
-
-  printf("Header do ipv4: \n");
-  ipv4.Print(std::cout);
-  printf("\n \n");
-
   NS_TEST_EXPECT_MSG_EQ (ipv4.GetProtocol (), 1," The received Packet is not an ICMP packet");
+
+  Icmpv4Echo echo;
+  p->RemoveHeader (echo);
 
   Icmpv4Header icmp;
   p->RemoveHeader (icmp);
 
-  printf("Header do icmpv4: \n");
-  icmp.Print(std::cout);
-  printf("\n \n");
-
-
   NS_TEST_EXPECT_MSG_EQ (icmp.GetType (), Icmpv4Header::ICMPV4_ECHO_REPLY,
                          " The received Packet is not a ICMPV4_ECHO_REPLY");
+
+  printf("Pacote Recebido: \n");
+  m_receivedPacket->Print(std::cout);
+  printf("\n \n");
+
 }
 
 
@@ -781,7 +781,8 @@ static IcmpTestSuite icmpTestSuite; //!< Static variable for test initialization
 
 int main (int argc, char *argv[])
 {
-	
+	Packet::EnablePrinting();
+
     IcmpEchoReplyTestCase icmp;
     icmp.DoRun();
   
