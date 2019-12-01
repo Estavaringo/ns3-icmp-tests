@@ -169,7 +169,7 @@ IcmpEchoReplyTestCase::ReceivePkt (Ptr <Socket> socket)
 void
 IcmpEchoReplyTestCase::DoRun ()
 {
-  printf("\tIniciando IcmpEchoReplyTestCase... \n\n");
+  printf("Iniciando IcmpEchoReplyTestCase... \n\n");
   NodeContainer n;
   n.Create (2);
 
@@ -211,7 +211,7 @@ IcmpEchoReplyTestCase::DoRun ()
   m_receivedPacket->Print(std::cout);
   printf("\n \n");
 
-  printf("\tFinalizando IcmpEchoReplyTestCase com sucesso!\n\n");
+  printf("Finalizando IcmpEchoReplyTestCase com sucesso!\n\n");
   Simulator::Destroy ();
 
   printf("\n\n");
@@ -296,7 +296,7 @@ IcmpTimeExceedTestCase::SendData (Ptr<Socket> socket, Ipv4Address dst)
 void
 IcmpTimeExceedTestCase::ReceivePkt (Ptr<Socket> socket)
 {
-  printf("\n\n\tPacote Recebido!: \n\n");
+  printf("\n\nPacote Recebido!: \n\n");
   Address from;
   Ptr<Packet> p = socket->RecvFrom (0xffffffff, 0, from);
   m_receivedPacket = p->Copy ();
@@ -432,7 +432,7 @@ IcmpV6EchoReplyTestCase::DoSendData (Ptr<Socket> socket, Ipv6Address dst)
   NS_TEST_EXPECT_MSG_EQ (socket->SendTo (p, 0, realTo),
                          (int) p->GetSize (), " Unable to send ICMP Echo Packet");
 
-  printf("Pacote Enviado");
+  printf("Pacote Enviado:\n");
   p->Print(std::cout);
   printf("\n\n");
 }
@@ -484,7 +484,7 @@ void
 IcmpV6EchoReplyTestCase::DoRun ()
 {
 
-  printf("\tIniciando IcmpV6EchoReplyTestCase: \n\n");
+  printf("Iniciando IcmpV6EchoReplyTestCase: \n\n");
   NodeContainer n;
   n.Create (2);
 
@@ -530,7 +530,7 @@ IcmpV6EchoReplyTestCase::DoRun ()
   m_receivedPacket->Print(std::cout);
   printf("\n\n");
 
-  printf("\tFinalizando IcmpV6EchoReplyTestCase com sucesso!\n\n");
+  printf("Finalizando IcmpV6EchoReplyTestCase com sucesso!\n\n");
 
   Simulator::Destroy ();
 }
@@ -590,7 +590,7 @@ IcmpV6TimeExceedTestCase::DoSendData (Ptr<Socket> socket, Ipv6Address dst)
 
   socket->SendTo (p, 0, realTo);
 
-  printf("Pacote Enviado");
+  printf("Pacote Enviado: \n");
   p->Print(std::cout);
   printf("\n\n");
 
@@ -640,7 +640,7 @@ IcmpV6TimeExceedTestCase::ReceivePkt (Ptr <Socket> socket)
 void
 IcmpV6TimeExceedTestCase::DoRun ()
 {
-	printf("\tIniciando IcmpV6TimeExceedTestCase: \n\n");
+	printf("Iniciando IcmpV6TimeExceedTestCase: \n\n");
   NodeContainer n, n0n1,n1n2;
   n.Create (3);
   n0n1.Add (n.Get (0));
@@ -698,7 +698,7 @@ IcmpV6TimeExceedTestCase::DoRun ()
   m_receivedPacket->Print(std::cout);
   printf("\n\n");
 
-  printf("\tFinalizando IcmpV6TimeExceedTestCase com sucesso!\n\n");
+  printf("Finalizando IcmpV6TimeExceedTestCase com sucesso!\n\n");
 
   Simulator::Destroy ();
 }
@@ -914,7 +914,7 @@ IcmpV6DestinationUnreachableTestCase::DoSendData (Ptr<Socket> socket, Ipv6Addres
 
   socket->SendTo (p, 0, realTo);
 
-  printf("Pacote Enviado");
+  printf("Pacote Enviado:\n");
   p->Print(std::cout);
   printf("\n\n");
 
@@ -964,13 +964,13 @@ IcmpV6DestinationUnreachableTestCase::ReceivePkt (Ptr <Socket> socket)
 void
 IcmpV6DestinationUnreachableTestCase::DoRun ()
 {
-	printf("\tIniciando IcmpV6DestinationUnreachableTestCase: \n\n");
+	printf("Iniciando IcmpV6DestinationUnreachableTestCase: \n\n");
   NodeContainer n, n0n1,n1n2;
-  n.Create (3);
+  n.Create (4);
   n0n1.Add (n.Get (0));
   n0n1.Add (n.Get (1));
-  n1n2.Add (n.Get (1));
   n1n2.Add (n.Get (2));
+  n1n2.Add (n.Get (3));
 
   Ptr<SimpleChannel> channel = CreateObject <SimpleChannel> ();
   Ptr<SimpleChannel> channel2 = CreateObject <SimpleChannel> ();
@@ -1022,7 +1022,7 @@ IcmpV6DestinationUnreachableTestCase::DoRun ()
   m_receivedPacket->Print(std::cout);
   printf("\n\n");
 
-  printf("\tFinalizando IcmpV6DestinationUnreachableTestCase com sucesso!\n\n");
+  printf("Finalizando IcmpV6DestinationUnreachableTestCase com sucesso!\n\n");
 
   Simulator::Destroy ();
 }
@@ -1053,17 +1053,17 @@ static IcmpTestSuite icmpTestSuite; //!< Static variable for test initialization
 
 int main (int argc, char *argv[])
 {
-  printf("\n Início das simulações");
+    printf("\n Início das simulações");
 
 	Packet::EnablePrinting();
 
-  IcmpEchoReplyTestCase icmp;
-  icmp.DoRun();
+    IcmpEchoReplyTestCase icmp;
+    icmp.DoRun();
   
-  IcmpV6EchoReplyTestCase icmpv6;
-  icmpv6.DoRun();
+    IcmpV6EchoReplyTestCase icmpv6;
+    icmpv6.DoRun();
 
-	IcmpTimeExceedTestCase timeExceed;
+    IcmpTimeExceedTestCase timeExceed;
 	timeExceed.DoRun();
 
 	IcmpV6TimeExceedTestCase timeExceedV6;
@@ -1075,6 +1075,6 @@ int main (int argc, char *argv[])
 	IcmpV6DestinationUnreachableTestCase destinationUnreachableV6;
 	destinationUnreachableV6.DoRun();
 
-  printf("\n Fim das simulações");
-  return 0;
+    printf("\n Fim das simulações");
+    return 0;
 }
