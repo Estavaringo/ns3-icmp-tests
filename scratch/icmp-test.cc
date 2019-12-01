@@ -429,12 +429,13 @@ IcmpV6EchoReplyTestCase::DoSendData (Ptr<Socket> socket, Ipv6Address dst)
 
   Address realTo = Inet6SocketAddress (dst, 1234);
 
-  NS_TEST_EXPECT_MSG_EQ (socket->SendTo (p, 0, realTo),
-                         (int) p->GetSize (), " Unable to send ICMP Echo Packet");
-
   printf("Pacote Enviado:\n");
   p->Print(std::cout);
   printf("\n\n");
+
+  NS_TEST_EXPECT_MSG_EQ (socket->SendTo (p, 0, realTo),
+                         (int) p->GetSize (), " Unable to send ICMP Echo Packet");
+
 }
 
 
@@ -454,6 +455,9 @@ IcmpV6EchoReplyTestCase::ReceivePkt (Ptr <Socket> socket)
   Ptr<Packet> p = socket->RecvFrom (from);
   m_receivedPacket = p->Copy ();
 
+  printf("Pacote recebido:\n");
+  p->Print(std::cout);
+  printf("\n\n");
 
   if (Inet6SocketAddress::IsMatchingType (from))
     {
@@ -471,6 +475,7 @@ IcmpV6EchoReplyTestCase::ReceivePkt (Ptr <Socket> socket)
       // Ignore the neighbor discovery (ICMPV6_ND) packets
       if (!(((int)icmpv6.GetType () >= 133) && ((int)icmpv6.GetType () <= 137)))
         {
+
           NS_TEST_EXPECT_MSG_EQ ((int) icmpv6.GetType (),
                                  Icmpv6Header::ICMPV6_ECHO_REPLY,
                                  "The received Packet is not a ICMPV6_ECHO_REPLY");
@@ -526,9 +531,6 @@ IcmpV6EchoReplyTestCase::DoRun ()
 
   NS_TEST_EXPECT_MSG_EQ (m_receivedPacket->GetSize (), 72, " Unexpected ICMPV6_ECHO_REPLY packet size");
 
-  printf("Pacote recebido:\n");
-  m_receivedPacket->Print(std::cout);
-  printf("\n\n");
 
   printf("Finalizando IcmpV6EchoReplyTestCase com sucesso!\n\n");
 
