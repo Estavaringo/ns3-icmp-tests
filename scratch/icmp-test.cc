@@ -131,20 +131,20 @@ IcmpEchoReplyTestCase::~IcmpEchoReplyTestCase ()
 void
 IcmpEchoReplyTestCase::DoSendData (Ptr<Socket> socket, Ipv4Address dst)
 {
-  printf("Iniciando IcmpEchoReplyTestCase... \n\n");
   
   Ptr<Packet> p = Create<Packet> ();
 
-  printf("Enviando echo request: \n");
+  printf("Enviando...: \n\n");
 
+  printf("Echo ICMPV4: \n");
   Icmpv4Echo echo;
   echo.SetSequenceNumber (1);
   echo.SetIdentifier (0);
   p->AddHeader (echo);
   echo.Print(std::cout);
-  printf("\n\n");
+  printf("\n");
 
-  printf("Cabeçalho da mensagem: \n");
+  printf("Cabeçalho ICMPV4: \n");
 
   Icmpv4Header header;
   header.SetType (Icmpv4Header::ICMPV4_ECHO);
@@ -181,18 +181,21 @@ IcmpEchoReplyTestCase::ReceivePkt (Ptr <Socket> socket)
 
 
   Ipv4Header ipv4;
+  p->RemoveHeader (ipv4);
+
   printf("Header do ipv4: \n");
   ipv4.Print(std::cout);
   printf("\n \n");
 
-  p->RemoveHeader (ipv4);
   NS_TEST_EXPECT_MSG_EQ (ipv4.GetProtocol (), 1," The received Packet is not an ICMP packet");
 
   Icmpv4Header icmp;
-  printf("Header do icmp: \n");
+  p->RemoveHeader (icmp);
+
+  printf("Header do icmpv4: \n");
   icmp.Print(std::cout);
   printf("\n \n");
-  p->RemoveHeader (icmp);
+
 
   NS_TEST_EXPECT_MSG_EQ (icmp.GetType (), Icmpv4Header::ICMPV4_ECHO_REPLY,
                          " The received Packet is not a ICMPV4_ECHO_REPLY");
@@ -202,6 +205,7 @@ IcmpEchoReplyTestCase::ReceivePkt (Ptr <Socket> socket)
 void
 IcmpEchoReplyTestCase::DoRun ()
 {
+  printf("Iniciando IcmpEchoReplyTestCase... \n\n");
   NodeContainer n;
   n.Create (2);
 
@@ -767,10 +771,10 @@ public:
 IcmpTestSuite::IcmpTestSuite ()
   : TestSuite ("icmp", UNIT)
 {
-  AddTestCase (new IcmpEchoReplyTestCase, TestCase::QUICK);
-  AddTestCase (new IcmpTimeExceedTestCase, TestCase::QUICK);
-  AddTestCase (new IcmpV6EchoReplyTestCase, TestCase::QUICK);
-  AddTestCase (new IcmpV6TimeExceedTestCase, TestCase::QUICK);
+  //AddTestCase (new IcmpEchoReplyTestCase, TestCase::QUICK);
+  //AddTestCase (new IcmpTimeExceedTestCase, TestCase::QUICK);
+  //AddTestCase (new IcmpV6EchoReplyTestCase, TestCase::QUICK);
+  //AddTestCase (new IcmpV6TimeExceedTestCase, TestCase::QUICK);
 }
 
 static IcmpTestSuite icmpTestSuite; //!< Static variable for test initialization
@@ -778,17 +782,17 @@ static IcmpTestSuite icmpTestSuite; //!< Static variable for test initialization
 int main (int argc, char *argv[])
 {
 	
-/*IcmpEchoReplyTestCase icmp;
-  icmp.DoRun();
+    IcmpEchoReplyTestCase icmp;
+    icmp.DoRun();
   
-  IcmpV6EchoReplyTestCase icmpv6;
-  icmpv6.DoRun(); */
+    /*IcmpV6EchoReplyTestCase icmpv6;
+    icmpv6.DoRun();*/ 
 
-	IcmpTimeExceedTestCase timeExceed;
+	/*IcmpTimeExceedTestCase timeExceed;
 	timeExceed.DoRun();
 
 	IcmpV6TimeExceedTestCase timeExceedV6;
-	timeExceedV6.DoRun();
+	timeExceedV6.DoRun();*/
 
   printf("\n fim do main ");
   return 0;
