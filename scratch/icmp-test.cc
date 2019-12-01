@@ -138,9 +138,8 @@ IcmpEchoReplyTestCase::DoSendData (Ptr<Socket> socket, Ipv4Address dst)
 
   Icmpv4Echo echo;
   echo.SetSequenceNumber (1);
-  echo.SetIdentifier (0);
+  echo.SetIdentifier (5);
   p->AddHeader (echo);
-  echo.Print(std::cout);
   printf("\n\n");
 
 
