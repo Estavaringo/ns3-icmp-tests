@@ -590,11 +590,11 @@ IcmpV6TimeExceedTestCase::DoSendData (Ptr<Socket> socket, Ipv6Address dst)
 
   Address realTo = Inet6SocketAddress (dst, 1234);
 
-  socket->SendTo (p, 0, realTo);
-
   printf("Pacote Enviado: \n");
   p->Print(std::cout);
   printf("\n\n");
+
+  socket->SendTo (p, 0, realTo);
 
 }
 
@@ -614,6 +614,10 @@ IcmpV6TimeExceedTestCase::ReceivePkt (Ptr <Socket> socket)
   Address from;
   Ptr<Packet> p = socket->RecvFrom (from);
   m_receivedPacket = p->Copy ();
+
+  printf("Pacote recebido:\n");
+  p->Print(std::cout);
+  printf("\n\n");
 
   if (Inet6SocketAddress::IsMatchingType (from))
     {
@@ -695,10 +699,6 @@ IcmpV6TimeExceedTestCase::DoRun ()
   socket->SetIpv6HopLimit (1);
 
   SendData (socket, interfaces2.GetAddress (1,1));
-
-  printf("Pacote recebido:\n");
-  m_receivedPacket->Print(std::cout);
-  printf("\n\n");
 
   printf("Finalizando IcmpV6TimeExceedTestCase com sucesso!\n\n");
 
@@ -789,8 +789,7 @@ IcmpDestinationUnreachableTestCase::ReceivePkt (Ptr<Socket> socket)
   Ipv4Header ipv4;
   p->RemoveHeader (ipv4);
   NS_TEST_EXPECT_MSG_EQ (ipv4.GetProtocol (), 1,"The received packet is not an ICMP packet");
-  NS_TEST_EXPECT_MSG_EQ (ipv4.GetSource (),Ipv4Address ("10.0.0.2"),
-                        "ICMP Destination Unreachable Response should come from 10.0.0.2");
+  
 
   Icmpv4Header icmp;
   p->RemoveHeader (icmp);
@@ -847,9 +846,9 @@ IcmpDestinationUnreachableTestCase::DoRun ()
   NS_TEST_EXPECT_MSG_EQ (socket->Bind (src),0," Socket Binding failed");
 
 
-  // The ttl is not big enough , causing an ICMP Destination Unreachable response
-  socket->SetIpTtl (1);
-  SendData (socket, i2.GetAddress (1,0));
+
+  socket->SetIpTtl (64);
+  SendData (socket, Ipv4Address("10.0.1.5"));
 
 
   printf("Pacote Recebido: \n");
@@ -914,11 +913,11 @@ IcmpV6DestinationUnreachableTestCase::DoSendData (Ptr<Socket> socket, Ipv6Addres
 
   Address realTo = Inet6SocketAddress (dst, 1234);
 
-  socket->SendTo (p, 0, realTo);
-
   printf("Pacote Enviado:\n");
   p->Print(std::cout);
   printf("\n\n");
+
+  socket->SendTo (p, 0, realTo);
 
 }
 
@@ -938,6 +937,10 @@ IcmpV6DestinationUnreachableTestCase::ReceivePkt (Ptr <Socket> socket)
   Address from;
   Ptr<Packet> p = socket->RecvFrom (from);
   m_receivedPacket = p->Copy ();
+
+  printf("Pacote recebido:\n");
+  p->Print(std::cout);
+  printf("\n\n");
 
   if (Inet6SocketAddress::IsMatchingType (from))
     {
@@ -968,11 +971,11 @@ IcmpV6DestinationUnreachableTestCase::DoRun ()
 {
 	printf("Iniciando IcmpV6DestinationUnreachableTestCase: \n\n");
   NodeContainer n, n0n1,n1n2;
-  n.Create (4);
+  n.Create (3);
   n0n1.Add (n.Get (0));
   n0n1.Add (n.Get (1));
+  n1n2.Add (n.Get (1));
   n1n2.Add (n.Get (2));
-  n1n2.Add (n.Get (3));
 
   Ptr<SimpleChannel> channel = CreateObject <SimpleChannel> ();
   Ptr<SimpleChannel> channel2 = CreateObject <SimpleChannel> ();
@@ -995,14 +998,14 @@ IcmpV6DestinationUnreachableTestCase::DoRun ()
   Ipv6AddressHelper address;
 
   address.NewNetwork ();
-  address.SetBase (Ipv6Address ("2001:1::"), Ipv6Prefix (64));
 
+  address.SetBase (Ipv6Address ("2001:1::"), Ipv6Prefix (64));
   Ipv6InterfaceContainer interfaces = address.Assign (devices);
   interfaces.SetForwarding (1,true);
   interfaces.SetDefaultRouteInAllNodes (1);
+   
   address.SetBase (Ipv6Address ("2001:2::"), Ipv6Prefix (64));
   Ipv6InterfaceContainer interfaces2 = address.Assign (devices2);
-
   interfaces2.SetForwarding (0,true);
   interfaces2.SetDefaultRouteInAllNodes (0);
 
@@ -1015,14 +1018,9 @@ IcmpV6DestinationUnreachableTestCase::DoRun ()
   NS_TEST_EXPECT_MSG_EQ (socket->Bind (src),0," SocketV6 Binding failed");
 
   // In Ipv6 TTL is renamed hop limit in IPV6.
-  // The hop limit is not big enough , causing an ICMPV6 Destination Unreachable error
-  socket->SetIpv6HopLimit (1);
+  socket->SetIpv6HopLimit (64);
 
-  SendData (socket, interfaces2.GetAddress (1,1));
-
-  printf("Pacote recebido:\n");
-  m_receivedPacket->Print(std::cout);
-  printf("\n\n");
+  SendData (socket, Ipv6Address("2001:2::200:ff:fe00:5"));
 
   printf("Finalizando IcmpV6DestinationUnreachableTestCase com sucesso!\n\n");
 
@@ -1055,7 +1053,7 @@ static IcmpTestSuite icmpTestSuite; //!< Static variable for test initialization
 
 int main (int argc, char *argv[])
 {
-    printf("\n Início das simulações");
+    printf("\n\t Início das simulações\n\n");
 
 	Packet::EnablePrinting();
 
@@ -1065,18 +1063,18 @@ int main (int argc, char *argv[])
     IcmpV6EchoReplyTestCase icmpv6;
     icmpv6.DoRun();
 
-    IcmpTimeExceedTestCase timeExceed;
-	timeExceed.DoRun();
+    /*IcmpTimeExceedTestCase timeExceed;
+	timeExceed.DoRun();*/
 
 	IcmpV6TimeExceedTestCase timeExceedV6;
 	timeExceedV6.DoRun();
 
-	IcmpDestinationUnreachableTestCase destinationUnreachable;
-	destinationUnreachable.DoRun();
+	/*IcmpDestinationUnreachableTestCase destinationUnreachable;
+	destinationUnreachable.DoRun();*/
 
 	IcmpV6DestinationUnreachableTestCase destinationUnreachableV6;
 	destinationUnreachableV6.DoRun();
 
-    printf("\n Fim das simulações");
+    printf("\n\t Fim das simulações\n");
     return 0;
 }
