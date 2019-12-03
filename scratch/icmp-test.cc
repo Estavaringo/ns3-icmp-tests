@@ -383,7 +383,7 @@ IcmpV6EchoReplyTestCase::DoSendData (Ptr<Socket> socket, Ipv6Address dst)
 
   Address realTo = Inet6SocketAddress (dst, 1234);
 
-  socket->SendTo (p, 0, realTo)
+  socket->SendTo (p, 0, realTo);
 
   printf("Pacote Enviado:\n");
   p->Print(std::cout);
@@ -539,7 +539,7 @@ IcmpV6TimeExceedTestCase::DoSendData (Ptr<Socket> socket, Ipv6Address dst)
 
   Address realTo = Inet6SocketAddress (dst, 1234);
 
-  socket->SendTo (p, 0, realTo)
+  socket->SendTo (p, 0, realTo);
 
   printf("Pacote Enviado: \n");
   p->Print(std::cout);
@@ -860,7 +860,7 @@ IcmpV6DestinationUnreachableTestCase::DoSendData (Ptr<Socket> socket, Ipv6Addres
 
   Address realTo = Inet6SocketAddress (dst, 1234);
 
-  socket->SendTo (p, 0, realTo) 
+  socket->SendTo (p, 0, realTo); 
 
   printf("Pacote Enviado:\n");
   p->Print(std::cout);
@@ -980,28 +980,14 @@ IcmpV6DestinationUnreachableTestCase::DoRun ()
 }
 
 /**
- * \ingroup icmp-test
- * \ingroup tests
- *
- * \brief ICMP TestSuite
+ * \brief ICMP Tests
  */
 
-class IcmpTestSuite : public TestSuite
+class IcmpTest : 
 {
 public:
-  IcmpTestSuite ();
+  IcmpTest ();
 };
-
-IcmpTestSuite::IcmpTestSuite ()
-  : TestSuite ("icmp", UNIT)
-{   
-   AddTestCase (new IcmpEchoReplyTestCase, TestCase::QUICK);
-   AddTestCase (new IcmpTimeExceedTestCase, TestCase::QUICK);
-   AddTestCase (new IcmpV6EchoReplyTestCase, TestCase::QUICK);
-   AddTestCase (new IcmpV6TimeExceedTestCase, TestCase::QUICK);
-}
-
-static IcmpTestSuite icmpTestSuite; //!< Static variable for test initialization
 
 int main (int argc, char *argv[])
 {
