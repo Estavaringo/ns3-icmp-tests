@@ -229,7 +229,7 @@ IcmpTimeExceedTestCase::DoSendData (Ptr<Socket> socket, Ipv4Address dst)
     return;
   }
 
-  printf("Pacote Enviado");
+  printf("Pacote Enviado:\n");
   p->Print(std::cout);
   printf("\n\n");
 
