@@ -1,44 +1,3 @@
-// Test program for the Internet Control Message Protocol (ICMP) responses.
-//
-// IcmpEchoReplyTestCase scenario:
-//
-//               n0 <------------------> n1
-//              i(0,0)                 i(1,0)
-//
-//        Test that sends a single ICMP echo packet with TTL = 1 from n0 to n1,
-//        n1 receives the packet and send an ICMP echo reply.
-//
-//
-// IcmpTimeExceedTestCase scenario:
-//
-//                           channel1            channel2
-//               n0 <------------------> n1 <---------------------> n2
-//              i(0,0)                 i(1,0)                     i2(1,0)
-//                                     i2(0,0)
-//
-//         Test that sends a single ICMP echo packet with TTL = 1 from n0 to n4,
-//         however, the TTL is not enough and n1 reply to n0 with an ICMP time exceed.
-//
-//
-// IcmpV6EchoReplyTestCase scenario:
-//
-//               n0 <-------------------> n1
-//              i(0,1)                  i(1,1)
-//
-//         Test that sends a single ICMPV6 ECHO request with hopLimit = 1 from n0 to n1,
-//         n1 receives the packet and send an ICMPV6 echo reply.
-//
-// IcmpV6TimeExceedTestCase scenario:
-//
-//                        channel1                channel2
-//               n0 <------------------> n1 <---------------------> n2
-//              i(0,0)                  i(1,0)                    i2(1,0)
-//                                      i2(0,0)
-//
-//         Test that sends a single ICMPV6 echo packet with hopLimit = 1 from n0 to n4,
-//         however, the hopLimit is not enough and n1 reply to n0 with an ICMPV6 time exceed error.
-
-
 #include "ns3/ipv4-address-helper.h"
 #include "ns3/ipv6-address-helper.h"
 #include "ns3/simple-net-device.h"
@@ -49,7 +8,6 @@
 #include "ns3/socket.h"
 #include "ns3/socket-factory.h"
 #include "ns3/uinteger.h"
-#include "ns3/assert.h"
 #include "ns3/log.h"
 #include "ns3/ipv4-global-routing-helper.h"
 #include "ns3/ipv6-static-routing-helper.h"
@@ -67,15 +25,6 @@ NS_LOG_COMPONENT_DEFINE ("Icmpv4HeaderTest");
 using namespace ns3;
 
 /**
- * \ingroup internet-apps
- * \defgroup icmp-test ICMP protocol tests
- */
-
-
-/**
- * \ingroup icmp-test
- * \ingroup tests
- *
  * \brief ICMP  Echo Reply Test
  */
 class IcmpEchoReplyTestCase : public TestCase
@@ -127,12 +76,15 @@ IcmpEchoReplyTestCase::DoSendData (Ptr<Socket> socket, Ipv4Address dst)
 
   Address realTo = InetSocketAddress (dst, 1234);
 
-  NS_TEST_EXPECT_MSG_EQ (socket->SendTo (p, 0, realTo),
-                         (int) p->GetSize (), " Unable to send ICMP Echo Packet");
+  if(socket->SendTo (p, 0, realTo) != (int) p->GetSize ()){
+    printf("Falha ao enviar Pacote ICMP Echo request\n\n");
+    return;
+  }
+
 
   printf("Pacote Enviado: \n");
   p->Print(std::cout);
-  printf("\n \n");
+  printf("\n\n");
 
 }
 
@@ -156,13 +108,17 @@ IcmpEchoReplyTestCase::ReceivePkt (Ptr <Socket> socket)
 
   Ipv4Header ipv4;
   p->RemoveHeader (ipv4);
-  NS_TEST_EXPECT_MSG_EQ (ipv4.GetProtocol (), 1," The received Packet is not an ICMP packet");
+
+  if(ipv4.GetProtocol () != 1){
+    printf("O pacote recebido não é um pacote ICMP\n\n");
+  }
 
   Icmpv4Header icmp;
   p->RemoveHeader (icmp);
 
-  NS_TEST_EXPECT_MSG_EQ (icmp.GetType (), Icmpv4Header::ICMPV4_ECHO_REPLY,
-                         " The received Packet is not a ICMPV4_ECHO_REPLY");
+  if(icmp.GetType () != Icmpv4Header::ICMPV4_ECHO_REPLY){
+    printf("O pacote recebido não é um pacote ICMP Echo Reply\n\n");
+  }
 }
 
 
@@ -199,17 +155,19 @@ IcmpEchoReplyTestCase::DoRun ()
   socket->SetRecvCallback (MakeCallback (&IcmpEchoReplyTestCase::ReceivePkt, this));
 
   InetSocketAddress src = InetSocketAddress (Ipv4Address::GetAny (), 0);
-  NS_TEST_EXPECT_MSG_EQ (socket->Bind (src),0," Socket Binding failed");
+  
+  if(socket->Bind (src) != 0){
+    printf("Falha ao efetuar socket bind\n\n");
+    printf("Finalizando IcmpEchoReplyTestCase\n\n");
+    return;
+  }
 
-  // Set a TTL big enough
   socket->SetIpTtl (1);
   SendData (socket, i.GetAddress (1,0));
 
-  NS_TEST_EXPECT_MSG_EQ (m_receivedPacket->GetSize (), 28, " Unexpected ICMPV4_ECHO_REPLY packet size");
-  
   printf("Pacote Recebido: \n");
   m_receivedPacket->Print(std::cout);
-  printf("\n \n");
+  printf("\n\n");
 
   printf("Finalizando IcmpEchoReplyTestCase com sucesso!\n\n");
   Simulator::Destroy ();
@@ -219,9 +177,6 @@ IcmpEchoReplyTestCase::DoRun ()
 
 
 /**
- * \ingroup icmp-test
- * \ingroup tests
- *
  * \brief ICMP Time Exceed Reply Test
  */
 class IcmpTimeExceedTestCase : public TestCase
@@ -273,7 +228,10 @@ IcmpTimeExceedTestCase::DoSendData (Ptr<Socket> socket, Ipv4Address dst)
   Address realTo = InetSocketAddress (dst, 1234);
 
 
-  socket->SendTo (p, 0, realTo);
+  if(socket->SendTo (p, 0, realTo) != (int) p->GetSize ()){
+    printf("Falha ao enviar Pacote ICMP Echo request\n\n");
+    return;
+  }
 
   printf("Pacote Enviado");
   p->Print(std::cout);
@@ -296,22 +254,24 @@ IcmpTimeExceedTestCase::SendData (Ptr<Socket> socket, Ipv4Address dst)
 void
 IcmpTimeExceedTestCase::ReceivePkt (Ptr<Socket> socket)
 {
-  printf("\n\nPacote Recebido!: \n\n");
   Address from;
   Ptr<Packet> p = socket->RecvFrom (0xffffffff, 0, from);
   m_receivedPacket = p->Copy ();
 
   Ipv4Header ipv4;
   p->RemoveHeader (ipv4);
-  NS_TEST_EXPECT_MSG_EQ (ipv4.GetProtocol (), 1,"The received packet is not an ICMP packet");
-  NS_TEST_EXPECT_MSG_EQ (ipv4.GetSource (),Ipv4Address ("10.0.0.2"),
-                        "ICMP Time Exceed Response should come from 10.0.0.2");
+  if(ipv4.GetProtocol () != 1){
+    printf("O pacote recebido não é um pacote ICMP\n\n");
+  }
+  if(ipv4.GetSource () != Ipv4Address ("10.0.0.2")){
+    printf("A resposta de Time Exceeded deveria vir do nó 10.0.0.2\n\n");
+  }
 
   Icmpv4Header icmp;
   p->RemoveHeader (icmp);
-  printf("\n\n");
-  NS_TEST_EXPECT_MSG_EQ (icmp.GetType (), Icmpv4Header::ICMPV4_TIME_EXCEEDED,
-                         "The received packet is not a ICMPV4_TIME_EXCEEDED packet ");
+  if(icmp.GetType () != Icmpv4Header::ICMPV4_TIME_EXCEEDED){
+    printf("O pacote recebido não é um pacote ICMP Time Exceeded\n\n");
+  }
 }
 
 
@@ -359,10 +319,14 @@ IcmpTimeExceedTestCase::DoRun ()
 
 
   InetSocketAddress src = InetSocketAddress (Ipv4Address::GetAny (), 0);
-  NS_TEST_EXPECT_MSG_EQ (socket->Bind (src),0," Socket Binding failed");
+  if(socket->Bind (src) != 0){
+    printf("Falha ao efetuar socket bind\n\n");
+    printf("Finalizando IcmpTimeExceedTestCase!\n\n");
+    return;
+  }
 
 
-  // The ttl is not big enough , causing an ICMP Time Exceeded response
+  // O TTL deve ser pequeno o suficiente para causa uma resposta ICMP Time Exceeded
   socket->SetIpTtl (1);
   SendData (socket, i2.GetAddress (1,0));
 
@@ -377,9 +341,6 @@ IcmpTimeExceedTestCase::DoRun ()
 
 
 /**
- * \ingroup icmp-test
- * \ingroup tests
- *
  * \brief ICMPV6  Echo Reply Test
  */
 class IcmpV6EchoReplyTestCase : public TestCase
@@ -428,13 +389,13 @@ IcmpV6EchoReplyTestCase::DoSendData (Ptr<Socket> socket, Ipv6Address dst)
   p->AddHeader (header);
 
   Address realTo = Inet6SocketAddress (dst, 1234);
-
+  if(socket->SendTo (p, 0, realTo) != (int) p->GetSize ()){
+    printf("Falha ao enviar Pacote ICMPV6 Echo request\n\n");
+    return;
+  }
   printf("Pacote Enviado:\n");
   p->Print(std::cout);
   printf("\n\n");
-
-  NS_TEST_EXPECT_MSG_EQ (socket->SendTo (p, 0, realTo),
-                         (int) p->GetSize (), " Unable to send ICMP Echo Packet");
 
 }
 
@@ -455,30 +416,28 @@ IcmpV6EchoReplyTestCase::ReceivePkt (Ptr <Socket> socket)
   Ptr<Packet> p = socket->RecvFrom (from);
   m_receivedPacket = p->Copy ();
 
-  printf("Pacote recebido:\n");
-  p->Print(std::cout);
-  printf("\n\n");
-
   if (Inet6SocketAddress::IsMatchingType (from))
     {
       Ipv6Header ipv6;
       p->RemoveHeader (ipv6);
-
-      NS_TEST_EXPECT_MSG_EQ (ipv6.GetNextHeader (),
-                             Ipv6Header::IPV6_ICMPV6,
-                             "The received Packet is not an ICMPV6 packet");
+      if(ipv6.GetNextHeader () != Ipv6Header::IPV6_ICMPV6){
+        printf("O pacote recebido não é um pacote ICMPV6\n\n");
+      }
 
       Icmpv6Header icmpv6;
       p->RemoveHeader (icmpv6);
-
-
-      // Ignore the neighbor discovery (ICMPV6_ND) packets
+      // Ignora os pacotes de neighbor discovery
+      //Type 133 - Router Solicitation
+      //Type 134 - Router Advertisement
+      //Type 135 - Neighbor Solicitation
+      //Type 136 - Neighbor Advertisement
+      //Type 137 - Redirect Message
       if (!(((int)icmpv6.GetType () >= 133) && ((int)icmpv6.GetType () <= 137)))
         {
 
-          NS_TEST_EXPECT_MSG_EQ ((int) icmpv6.GetType (),
-                                 Icmpv6Header::ICMPV6_ECHO_REPLY,
-                                 "The received Packet is not a ICMPV6_ECHO_REPLY");
+          if((int) icmpv6.GetType () != Icmpv6Header::ICMPV6_ECHO_REPLY){
+            printf("O pacote recebido não é um pacote ICMPV6 Echo Reply\n\n");
+          }
         }
 
     }
@@ -522,26 +481,28 @@ IcmpV6EchoReplyTestCase::DoRun ()
   socket->SetRecvCallback (MakeCallback (&IcmpV6EchoReplyTestCase::ReceivePkt, this));
 
   Inet6SocketAddress src = Inet6SocketAddress (Ipv6Address::GetAny (), 0);
-  NS_TEST_EXPECT_MSG_EQ (socket->Bind (src),0," SocketV6 Binding failed");
+  
+  if(socket->Bind (src) != 0){
+    printf("Falha ao efetuar socket bind\n\n");
+    printf("Finalizando IcmpV6EchoReplyTestCase\n\n");
+    return;
+  }
 
-  // Set a TTL big enough
   socket->SetIpTtl (1);
 
   SendData (socket, i.GetAddress (1,1));
 
-  NS_TEST_EXPECT_MSG_EQ (m_receivedPacket->GetSize (), 72, " Unexpected ICMPV6_ECHO_REPLY packet size");
 
+  printf("Pacote recebido:\n");
+  m_receivedPacket->Print(std::cout);
+  printf("\n\n");
 
   printf("Finalizando IcmpV6EchoReplyTestCase com sucesso!\n\n");
-
   Simulator::Destroy ();
 }
 
 
 /**
- * \ingroup icmp-test
- * \ingroup tests
- *
  * \brief ICMPV6  Time Exceed response test
  */
 class IcmpV6TimeExceedTestCase : public TestCase
@@ -590,11 +551,14 @@ IcmpV6TimeExceedTestCase::DoSendData (Ptr<Socket> socket, Ipv6Address dst)
 
   Address realTo = Inet6SocketAddress (dst, 1234);
 
+  if(socket->SendTo (p, 0, realTo) != (int) p->GetSize ()){
+    printf("Falha ao enviar Pacote ICMPV6 Echo request\n\n");
+    return;
+  }
+
   printf("Pacote Enviado: \n");
   p->Print(std::cout);
   printf("\n\n");
-
-  socket->SendTo (p, 0, realTo);
 
 }
 
@@ -615,30 +579,30 @@ IcmpV6TimeExceedTestCase::ReceivePkt (Ptr <Socket> socket)
   Ptr<Packet> p = socket->RecvFrom (from);
   m_receivedPacket = p->Copy ();
 
-  printf("Pacote recebido:\n");
-  p->Print(std::cout);
-  printf("\n\n");
-
   if (Inet6SocketAddress::IsMatchingType (from))
     {
 
-
       Ipv6Header ipv6;
       p->RemoveHeader (ipv6);
-
-      NS_TEST_EXPECT_MSG_EQ (ipv6.GetNextHeader (),
-                             Ipv6Header::IPV6_ICMPV6,
-                             "The received Packet is not an ICMPV6 packet");
+      if(ipv6.GetNextHeader () != Ipv6Header::IPV6_ICMPV6){
+        printf("O pacote recebido não é um pacote ICMPV6\n\n");
+      }
+  
 
       Icmpv6Header icmpv6;
       p->RemoveHeader (icmpv6);
 
-      // Ignore the neighbor discovery (ICMPV6_ND) packets
+      // Ignora os pacotes de neighbor discovery
+      //Type 133 - Router Solicitation
+      //Type 134 - Router Advertisement
+      //Type 135 - Neighbor Solicitation
+      //Type 136 - Neighbor Advertisement
+      //Type 137 - Redirect Message
       if (!(((int)icmpv6.GetType () >= 133) && ((int)icmpv6.GetType () <= 137)))
         {
-          NS_TEST_EXPECT_MSG_EQ ((int) icmpv6.GetType (),
-                                 Icmpv6Header::ICMPV6_ERROR_TIME_EXCEEDED,
-                                 "The received Packet is not a ICMPV6_ERROR_TIME_EXCEEDED");
+          if((int) icmpv6.GetType () != Icmpv6Header::ICMPV6_ERROR_TIME_EXCEEDED){
+            printf("O pacote recebido não é um pacote ICMPV6 Time Exceeded\n\n");
+          }
         }
     }
 }
@@ -692,23 +656,26 @@ IcmpV6TimeExceedTestCase::DoRun ()
   socket->SetRecvCallback (MakeCallback (&IcmpV6TimeExceedTestCase::ReceivePkt, this));
 
   Inet6SocketAddress src = Inet6SocketAddress (Ipv6Address::GetAny (), 0);
-  NS_TEST_EXPECT_MSG_EQ (socket->Bind (src),0," SocketV6 Binding failed");
+  if(socket->Bind (src) != 0){
+    printf("Falha ao efetuar socket bind\n\n");
+    printf("Finalizando IcmpV6TimeExceedTestCase\n\n");
+    return;
+  }
 
-  // In Ipv6 TTL is renamed hop limit in IPV6.
-  // The hop limit is not big enough , causing an ICMPV6 Time Exceeded error
+  // O TTL (Hop Limit) deve ser pequeno o suficiente para causa uma resposta ICMPV6 Time Exceeded
   socket->SetIpv6HopLimit (1);
 
   SendData (socket, interfaces2.GetAddress (1,1));
 
-  printf("Finalizando IcmpV6TimeExceedTestCase com sucesso!\n\n");
+  printf("Pacote recebido:\n");
+  m_receivedPacket->Print(std::cout);
+  printf("\n\n");
 
+  printf("Finalizando IcmpV6TimeExceedTestCase com sucesso!\n\n");
   Simulator::Destroy ();
 }
 
 /**
- * \ingroup icmp-test
- * \ingroup tests
- *
  * \brief ICMP Destination Unreachable Reply Test
  */
 class IcmpDestinationUnreachableTestCase : public TestCase
@@ -758,8 +725,10 @@ IcmpDestinationUnreachableTestCase::DoSendData (Ptr<Socket> socket, Ipv4Address 
 
   Address realTo = InetSocketAddress (dst, 1234);
 
-  NS_TEST_EXPECT_MSG_EQ (socket->SendTo (p, 0, realTo),
-                         (int) p->GetSize (), " Unable to send ICMP Echo Packet");
+  if(socket->SendTo (p, 0, realTo) != (int) p->GetSize ()){
+    printf("Falha ao enviar Pacote ICMP Echo request\n\n");
+    return;
+  }
 
   printf("Pacote Enviado: \n");
   p->Print(std::cout);
@@ -788,14 +757,15 @@ IcmpDestinationUnreachableTestCase::ReceivePkt (Ptr<Socket> socket)
 
   Ipv4Header ipv4;
   p->RemoveHeader (ipv4);
-  NS_TEST_EXPECT_MSG_EQ (ipv4.GetProtocol (), 1,"The received packet is not an ICMP packet");
-  
+  if(ipv4.GetProtocol () != 1){
+    printf("O pacote recebido não é um pacote ICMP\n\n");
+  }
 
   Icmpv4Header icmp;
   p->RemoveHeader (icmp);
-  NS_TEST_EXPECT_MSG_EQ (icmp.GetType (), Icmpv4Header::ICMPV4_DEST_UNREACH,
-                         "The received packet is not a ICMPV4_DESTINATION_UNREACHABLE packet ");
-
+  if(icmp.GetType () != Icmpv4Header::ICMPV4_ECHO_REPLY){
+    printf("O pacote recebido não é um pacote ICMP Destination Unreachable\n\n");
+  }
 }
 
 
@@ -843,17 +813,18 @@ IcmpDestinationUnreachableTestCase::DoRun ()
 
 
   InetSocketAddress src = InetSocketAddress (Ipv4Address::GetAny (), 0);
-  NS_TEST_EXPECT_MSG_EQ (socket->Bind (src),0," Socket Binding failed");
-
-
+  if(socket->Bind (src) != 0){
+    printf("Falha ao efetuar socket bind\n\n");
+    printf("Finalizando IcmpDestinationUnreachableTestCase\n\n");
+    return;
+  }
 
   socket->SetIpTtl (64);
   SendData (socket, Ipv4Address("10.0.1.5"));
 
-
   printf("Pacote Recebido: \n");
   m_receivedPacket->Print(std::cout);
-  printf("\n \n");
+  printf("\n\n");
 
   printf("Finalizando IcmpDestinationUnreachableTestCase com sucesso!\n");
   Simulator::Destroy ();
@@ -862,9 +833,6 @@ IcmpDestinationUnreachableTestCase::DoRun ()
 
 
 /**
- * \ingroup icmp-test
- * \ingroup tests
- *
  * \brief ICMPV6  Destination Unreachable response test
  */
 class IcmpV6DestinationUnreachableTestCase : public TestCase
@@ -913,11 +881,14 @@ IcmpV6DestinationUnreachableTestCase::DoSendData (Ptr<Socket> socket, Ipv6Addres
 
   Address realTo = Inet6SocketAddress (dst, 1234);
 
+  if(socket->SendTo (p, 0, realTo) != (int) p->GetSize ()){
+    printf("Falha ao enviar Pacote ICMPV6 Echo request\n\n");
+    return;
+  }
+
   printf("Pacote Enviado:\n");
   p->Print(std::cout);
   printf("\n\n");
-
-  socket->SendTo (p, 0, realTo);
 
 }
 
@@ -949,19 +920,24 @@ IcmpV6DestinationUnreachableTestCase::ReceivePkt (Ptr <Socket> socket)
       Ipv6Header ipv6;
       p->RemoveHeader (ipv6);
 
-      NS_TEST_EXPECT_MSG_EQ (ipv6.GetNextHeader (),
-                             Ipv6Header::IPV6_ICMPV6,
-                             "The received Packet is not an ICMPV6 packet");
+      if(ipv6.GetNextHeader () != Ipv6Header::IPV6_ICMPV6){
+        printf("O pacote recebido não é um pacote ICMPV6\n\n");
+      }
 
       Icmpv6Header icmpv6;
       p->RemoveHeader (icmpv6);
 
-      // Ignore the neighbor discovery (ICMPV6_ND) packets
+      // Ignora os pacotes de neighbor discovery
+      //Type 133 - Router Solicitation
+      //Type 134 - Router Advertisement
+      //Type 135 - Neighbor Solicitation
+      //Type 136 - Neighbor Advertisement
+      //Type 137 - Redirect Message
       if (!(((int)icmpv6.GetType () >= 133) && ((int)icmpv6.GetType () <= 137)))
-        {
-          NS_TEST_EXPECT_MSG_EQ ((int) icmpv6.GetType (),
-                                 Icmpv6Header::ICMPV6_ERROR_DESTINATION_UNREACHABLE,
-                                 "The received Packet is not a ICMPV6_ERROR_DESTINATION_UNREACHABLE");
+        {  
+          if((int) icmpv6.GetType () != Icmpv6Header::ICMPV6_ERROR_DESTINATION_UNREACHABLE){
+            printf("O pacote recebido não é um pacote ICMPV6 Destination Unreachable\n\n");
+          }
         }
     }
 }
@@ -1015,9 +991,11 @@ IcmpV6DestinationUnreachableTestCase::DoRun ()
   socket->SetRecvCallback (MakeCallback (&IcmpV6DestinationUnreachableTestCase::ReceivePkt, this));
 
   Inet6SocketAddress src = Inet6SocketAddress (Ipv6Address::GetAny (), 0);
-  NS_TEST_EXPECT_MSG_EQ (socket->Bind (src),0," SocketV6 Binding failed");
+  if(socket->Bind (src) != 0){
+   printf("Falha ao efetuar socket bind\n\n");
+   return;
+  }
 
-  // In Ipv6 TTL is renamed hop limit in IPV6.
   socket->SetIpv6HopLimit (64);
 
   SendData (socket, Ipv6Address("2001:2::200:ff:fe00:5"));
@@ -1053,28 +1031,28 @@ static IcmpTestSuite icmpTestSuite; //!< Static variable for test initialization
 
 int main (int argc, char *argv[])
 {
-    printf("\n\t Início das simulações\n\n");
+  printf("\n\t Início das simulações\n\n");
 
 	Packet::EnablePrinting();
 
-    IcmpEchoReplyTestCase icmp;
-    icmp.DoRun();
+  IcmpEchoReplyTestCase icmp;
+  icmp.DoRun();
+
+  IcmpV6EchoReplyTestCase icmpv6;
+  icmpv6.DoRun();
+
+  IcmpTimeExceedTestCase timeExceed;
+  timeExceed.DoRun();
+
+  IcmpV6TimeExceedTestCase timeExceedV6;
+  timeExceedV6.DoRun();
+
+  IcmpDestinationUnreachableTestCase destinationUnreachable;
+  destinationUnreachable.DoRun();
+
+  IcmpV6DestinationUnreachableTestCase destinationUnreachableV6;
+  destinationUnreachableV6.DoRun();
   
-    IcmpV6EchoReplyTestCase icmpv6;
-    icmpv6.DoRun();
-
-    /*IcmpTimeExceedTestCase timeExceed;
-	timeExceed.DoRun();*/
-
-	IcmpV6TimeExceedTestCase timeExceedV6;
-	timeExceedV6.DoRun();
-
-	/*IcmpDestinationUnreachableTestCase destinationUnreachable;
-	destinationUnreachable.DoRun();*/
-
-	IcmpV6DestinationUnreachableTestCase destinationUnreachableV6;
-	destinationUnreachableV6.DoRun();
-
-    printf("\n\t Fim das simulações\n");
-    return 0;
+  printf("\n\t Fim das simulações\n");
+  return 0;
 }
