@@ -166,7 +166,7 @@ IcmpEchoReplyTestCase::DoRun ()
   SendData (socket, i.GetAddress (1,0));
 
 
-  printf("Finalizando IcmpEchoReplyTestCase com sucesso!\n\n");
+  printf("Finalizando IcmpEchoReplyTestCase!\n\n");
   Simulator::Destroy ();
 
   printf("\n\n");
@@ -328,7 +328,7 @@ IcmpTimeExceedTestCase::DoRun ()
   socket->SetIpTtl (1);
   SendData (socket, i2.GetAddress (1,0));
 
-  printf("Finalizando IcmpTimeExceedTestCase com sucesso!\n");
+  printf("Finalizando IcmpTimeExceedTestCase!\n");
   Simulator::Destroy ();
   printf("\n\n");
 }
@@ -487,7 +487,7 @@ IcmpV6EchoReplyTestCase::DoRun ()
 
   SendData (socket, i.GetAddress (1,1));
 
-  printf("Finalizando IcmpV6EchoReplyTestCase com sucesso!\n\n");
+  printf("Finalizando IcmpV6EchoReplyTestCase!\n\n");
   Simulator::Destroy ();
 }
 
@@ -658,7 +658,7 @@ IcmpV6TimeExceedTestCase::DoRun ()
 
   SendData (socket, interfaces2.GetAddress (1,1));
 
-  printf("Finalizando IcmpV6TimeExceedTestCase com sucesso!\n\n");
+  printf("Finalizando IcmpV6TimeExceedTestCase!\n\n");
   Simulator::Destroy ();
 }
 
@@ -810,7 +810,7 @@ IcmpDestinationUnreachableTestCase::DoRun ()
   socket->SetIpTtl (4);
   SendData (socket, Ipv4Address("10.0.1.5"));
 
-  printf("Finalizando IcmpDestinationUnreachableTestCase com sucesso!\n");
+  printf("Finalizando IcmpDestinationUnreachableTestCase!\n");
   Simulator::Destroy ();
   printf("\n\n");
 }
@@ -981,7 +981,7 @@ IcmpV6DestinationUnreachableTestCase::DoRun ()
 
   SendData (socket, Ipv6Address("2001:2::200:ff:fe00:5"));
 
-  printf("Finalizando IcmpV6DestinationUnreachableTestCase com sucesso!\n\n");
+  printf("Finalizando IcmpV6DestinationUnreachableTestCase!\n\n");
 
   Simulator::Destroy ();
 }
