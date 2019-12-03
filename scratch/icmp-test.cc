@@ -979,37 +979,30 @@ IcmpV6DestinationUnreachableTestCase::DoRun ()
   Simulator::Destroy ();
 }
 
-/**
- * \brief ICMP Test
- */
-
-class IcmpTest
+int main (int argc, char *argv[])
 {
-  int main (int argc, char *argv[])
-  {
-    printf("\n\t Início das simulações\n\n");
+  printf("\n\t Início das simulações\n\n");
 
-    Packet::EnablePrinting();
+	Packet::EnablePrinting();
 
-    IcmpEchoReplyTestCase icmp;
-    icmp.DoRun();
+  IcmpEchoReplyTestCase icmp;
+  icmp.DoRun();
 
-    IcmpV6EchoReplyTestCase icmpv6;
-    icmpv6.DoRun();
+  IcmpV6EchoReplyTestCase icmpv6;
+  icmpv6.DoRun();
 
-    IcmpTimeExceedTestCase timeExceed;
-    timeExceed.DoRun();
+  IcmpTimeExceedTestCase timeExceed;
+  timeExceed.DoRun();
 
-    IcmpV6TimeExceedTestCase timeExceedV6;
-    timeExceedV6.DoRun();
+  IcmpV6TimeExceedTestCase timeExceedV6;
+  timeExceedV6.DoRun();
 
-    IcmpDestinationUnreachableTestCase destinationUnreachable;
-    destinationUnreachable.DoRun();
+  IcmpDestinationUnreachableTestCase destinationUnreachable;
+  destinationUnreachable.DoRun();
 
-    IcmpV6DestinationUnreachableTestCase destinationUnreachableV6;
-    destinationUnreachableV6.DoRun();
+  IcmpV6DestinationUnreachableTestCase destinationUnreachableV6;
+  destinationUnreachableV6.DoRun();
 
-    printf("\n\t Fim das simulações\n");
-    return 0;
-  }
+  printf("\n\t Fim das simulações\n");
+  return 0;
 }
