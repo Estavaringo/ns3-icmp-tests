@@ -39,7 +39,6 @@ public:
 
 public:
   virtual void DoRun (void);
-  Ptr<Packet> m_receivedPacket;
 
 };
 
@@ -92,7 +91,6 @@ IcmpEchoReplyTestCase::DoSendData (Ptr<Socket> socket, Ipv4Address dst)
 void
 IcmpEchoReplyTestCase::SendData (Ptr<Socket> socket, Ipv4Address dst)
 {
-  m_receivedPacket = Create<Packet> ();
   Simulator::ScheduleWithContext (socket->GetNode ()->GetId (), Seconds (0),
                                   &IcmpEchoReplyTestCase::DoSendData, this, socket, dst);
   Simulator::Run ();
@@ -104,7 +102,9 @@ IcmpEchoReplyTestCase::ReceivePkt (Ptr <Socket> socket)
   Address from;
   Ptr<Packet> p = socket->RecvFrom (0xffffffff, 0, from);
 
-  m_receivedPacket = p->Copy ();
+  printf("Pacote Recebido: \n");
+  p->Print(std::cout);
+  printf("\n\n");
 
   Ipv4Header ipv4;
   p->RemoveHeader (ipv4);
@@ -165,9 +165,6 @@ IcmpEchoReplyTestCase::DoRun ()
   socket->SetIpTtl (1);
   SendData (socket, i.GetAddress (1,0));
 
-  printf("Pacote Recebido: \n");
-  m_receivedPacket->Print(std::cout);
-  printf("\n\n");
 
   printf("Finalizando IcmpEchoReplyTestCase com sucesso!\n\n");
   Simulator::Destroy ();
@@ -191,7 +188,6 @@ public:
 
 public:
   virtual void DoRun (void);
-  Ptr<Packet> m_receivedPacket;
 
 };
 
@@ -243,7 +239,6 @@ IcmpTimeExceedTestCase::DoSendData (Ptr<Socket> socket, Ipv4Address dst)
 void
 IcmpTimeExceedTestCase::SendData (Ptr<Socket> socket, Ipv4Address dst)
 {
-  m_receivedPacket = Create<Packet> ();
   Simulator::ScheduleWithContext (socket->GetNode ()->GetId (), Seconds (0),
                                   &IcmpTimeExceedTestCase::DoSendData, this, socket, dst);
 
@@ -256,7 +251,10 @@ IcmpTimeExceedTestCase::ReceivePkt (Ptr<Socket> socket)
 {
   Address from;
   Ptr<Packet> p = socket->RecvFrom (0xffffffff, 0, from);
-  m_receivedPacket = p->Copy ();
+  
+  printf("Pacote Recebido: \n");
+  p->Print(std::cout);
+  printf("\n \n");
 
   Ipv4Header ipv4;
   p->RemoveHeader (ipv4);
@@ -330,10 +328,6 @@ IcmpTimeExceedTestCase::DoRun ()
   socket->SetIpTtl (1);
   SendData (socket, i2.GetAddress (1,0));
 
-  printf("Pacote Recebido: \n");
-  m_receivedPacket->Print(std::cout);
-  printf("\n \n");
-
   printf("Finalizando IcmpTimeExceedTestCase com sucesso!\n");
   Simulator::Destroy ();
   printf("\n\n");
@@ -355,7 +349,6 @@ public:
 
 public:
   virtual void DoRun (void);
-  Ptr<Packet> m_receivedPacket;
 
 };
 
@@ -403,7 +396,6 @@ IcmpV6EchoReplyTestCase::DoSendData (Ptr<Socket> socket, Ipv6Address dst)
 void
 IcmpV6EchoReplyTestCase::SendData (Ptr<Socket> socket, Ipv6Address dst)
 {
-  m_receivedPacket = Create<Packet> ();
   Simulator::ScheduleWithContext (socket->GetNode ()->GetId (), Seconds (0),
                                   &IcmpV6EchoReplyTestCase::DoSendData, this, socket, dst);
   Simulator::Run ();
@@ -414,7 +406,10 @@ IcmpV6EchoReplyTestCase::ReceivePkt (Ptr <Socket> socket)
 {
   Address from;
   Ptr<Packet> p = socket->RecvFrom (from);
-  m_receivedPacket = p->Copy ();
+
+  printf("Pacote recebido:\n");
+  p->Print(std::cout);
+  printf("\n\n");
 
   if (Inet6SocketAddress::IsMatchingType (from))
     {
@@ -492,11 +487,6 @@ IcmpV6EchoReplyTestCase::DoRun ()
 
   SendData (socket, i.GetAddress (1,1));
 
-
-  printf("Pacote recebido:\n");
-  m_receivedPacket->Print(std::cout);
-  printf("\n\n");
-
   printf("Finalizando IcmpV6EchoReplyTestCase com sucesso!\n\n");
   Simulator::Destroy ();
 }
@@ -517,7 +507,6 @@ public:
 
 public:
   virtual void DoRun (void);
-  Ptr<Packet> m_receivedPacket;
 
 };
 
@@ -566,7 +555,6 @@ IcmpV6TimeExceedTestCase::DoSendData (Ptr<Socket> socket, Ipv6Address dst)
 void
 IcmpV6TimeExceedTestCase::SendData (Ptr<Socket> socket, Ipv6Address dst)
 {
-  m_receivedPacket = Create<Packet> ();
   Simulator::ScheduleWithContext (socket->GetNode ()->GetId (), Seconds (0),
                                   &IcmpV6TimeExceedTestCase::DoSendData, this, socket, dst);
   Simulator::Run ();
@@ -577,7 +565,10 @@ IcmpV6TimeExceedTestCase::ReceivePkt (Ptr <Socket> socket)
 {
   Address from;
   Ptr<Packet> p = socket->RecvFrom (from);
-  m_receivedPacket = p->Copy ();
+
+  printf("Pacote recebido:\n");
+  p->Print(std::cout);
+  printf("\n\n");
 
   if (Inet6SocketAddress::IsMatchingType (from))
     {
@@ -667,10 +658,6 @@ IcmpV6TimeExceedTestCase::DoRun ()
 
   SendData (socket, interfaces2.GetAddress (1,1));
 
-  printf("Pacote recebido:\n");
-  m_receivedPacket->Print(std::cout);
-  printf("\n\n");
-
   printf("Finalizando IcmpV6TimeExceedTestCase com sucesso!\n\n");
   Simulator::Destroy ();
 }
@@ -690,7 +677,6 @@ public:
 
 public:
   virtual void DoRun (void);
-  Ptr<Packet> m_receivedPacket;
 
 };
 
@@ -740,7 +726,6 @@ IcmpDestinationUnreachableTestCase::DoSendData (Ptr<Socket> socket, Ipv4Address 
 void
 IcmpDestinationUnreachableTestCase::SendData (Ptr<Socket> socket, Ipv4Address dst)
 {
-  m_receivedPacket = Create<Packet> ();
   Simulator::ScheduleWithContext (socket->GetNode ()->GetId (), Seconds (0),
                                   &IcmpDestinationUnreachableTestCase::DoSendData, this, socket, dst);
 
@@ -753,7 +738,10 @@ IcmpDestinationUnreachableTestCase::ReceivePkt (Ptr<Socket> socket)
 {
   Address from;
   Ptr<Packet> p = socket->RecvFrom (0xffffffff, 0, from);
-  m_receivedPacket = p->Copy ();
+
+  printf("Pacote Recebido: \n");
+  p->Print(std::cout);
+  printf("\n\n");
 
   Ipv4Header ipv4;
   p->RemoveHeader (ipv4);
@@ -819,12 +807,8 @@ IcmpDestinationUnreachableTestCase::DoRun ()
     return;
   }
 
-  socket->SetIpTtl (64);
+  socket->SetIpTtl (4);
   SendData (socket, Ipv4Address("10.0.1.5"));
-
-  printf("Pacote Recebido: \n");
-  m_receivedPacket->Print(std::cout);
-  printf("\n\n");
 
   printf("Finalizando IcmpDestinationUnreachableTestCase com sucesso!\n");
   Simulator::Destroy ();
@@ -847,7 +831,6 @@ public:
 
 public:
   virtual void DoRun (void);
-  Ptr<Packet> m_receivedPacket;
 
 };
 
@@ -896,7 +879,6 @@ IcmpV6DestinationUnreachableTestCase::DoSendData (Ptr<Socket> socket, Ipv6Addres
 void
 IcmpV6DestinationUnreachableTestCase::SendData (Ptr<Socket> socket, Ipv6Address dst)
 {
-  m_receivedPacket = Create<Packet> ();
   Simulator::ScheduleWithContext (socket->GetNode ()->GetId (), Seconds (0),
                                   &IcmpV6DestinationUnreachableTestCase::DoSendData, this, socket, dst);
   Simulator::Run ();
@@ -907,7 +889,6 @@ IcmpV6DestinationUnreachableTestCase::ReceivePkt (Ptr <Socket> socket)
 {
   Address from;
   Ptr<Packet> p = socket->RecvFrom (from);
-  m_receivedPacket = p->Copy ();
 
   printf("Pacote recebido:\n");
   p->Print(std::cout);
@@ -1052,7 +1033,7 @@ int main (int argc, char *argv[])
 
   IcmpV6DestinationUnreachableTestCase destinationUnreachableV6;
   destinationUnreachableV6.DoRun();
-  
+
   printf("\n\t Fim das simulações\n");
   return 0;
 }
