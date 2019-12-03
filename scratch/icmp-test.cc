@@ -382,10 +382,9 @@ IcmpV6EchoReplyTestCase::DoSendData (Ptr<Socket> socket, Ipv6Address dst)
   p->AddHeader (header);
 
   Address realTo = Inet6SocketAddress (dst, 1234);
-  if(socket->SendTo (p, 0, realTo) != (int) p->GetSize ()){
-    printf("Falha ao enviar Pacote ICMPV6 Echo request\n\n");
-    return;
-  }
+
+  socket->SendTo (p, 0, realTo)
+
   printf("Pacote Enviado:\n");
   p->Print(std::cout);
   printf("\n\n");
@@ -540,10 +539,7 @@ IcmpV6TimeExceedTestCase::DoSendData (Ptr<Socket> socket, Ipv6Address dst)
 
   Address realTo = Inet6SocketAddress (dst, 1234);
 
-  if(socket->SendTo (p, 0, realTo) != (int) p->GetSize ()){
-    printf("Falha ao enviar Pacote ICMPV6 Echo request\n\n");
-    return;
-  }
+  socket->SendTo (p, 0, realTo)
 
   printf("Pacote Enviado: \n");
   p->Print(std::cout);
@@ -864,10 +860,7 @@ IcmpV6DestinationUnreachableTestCase::DoSendData (Ptr<Socket> socket, Ipv6Addres
 
   Address realTo = Inet6SocketAddress (dst, 1234);
 
-  if(socket->SendTo (p, 0, realTo) != (int) p->GetSize ()){
-    printf("Falha ao enviar Pacote ICMPV6 Echo request\n\n");
-    return;
-  }
+  socket->SendTo (p, 0, realTo) 
 
   printf("Pacote Enviado:\n");
   p->Print(std::cout);
