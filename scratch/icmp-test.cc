@@ -701,7 +701,7 @@ IcmpDestinationUnreachableTestCase::DoSendData (Ptr<Socket> socket, Ipv4Address 
 
 
   Icmpv4Header header;
-  header.SetType (Icmpv4Header::ICMPV4_DEST_UNREACH);
+  header.SetType (Icmpv4Header::ICMPV4_ECHO);
   header.SetCode (0);
   p->AddHeader (header);
 
