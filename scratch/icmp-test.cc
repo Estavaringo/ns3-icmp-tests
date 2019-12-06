@@ -701,7 +701,7 @@ IcmpDestinationUnreachableTestCase::DoSendData (Ptr<Socket> socket, Ipv4Address 
 
 
   Icmpv4Header header;
-  header.SetType (Icmpv4Header::ICMPV4_ECHO);
+  header.SetType (Icmpv4Header::ICMPV4_DEST_UNREACH);
   header.SetCode (0);
   p->AddHeader (header);
 
@@ -747,7 +747,7 @@ IcmpDestinationUnreachableTestCase::ReceivePkt (Ptr<Socket> socket)
 
   Icmpv4Header icmp;
   p->RemoveHeader (icmp);
-  if(icmp.GetType () != Icmpv4Header::ICMPV4_ECHO_REPLY){
+  if(icmp.GetType () != Icmpv4Header::ICMPV4_DEST_UNREACH){
     printf("O pacote recebido não é um pacote ICMP Destination Unreachable\n\n");
   }
 }
@@ -803,7 +803,7 @@ IcmpDestinationUnreachableTestCase::DoRun ()
     return;
   }
 
-  socket->SetIpTtl (4);
+  socket->SetIpTtl (5);
   SendData (socket, Ipv4Address("10.0.1.5"));
 
   printf("Finalizando IcmpDestinationUnreachableTestCase!\n");
